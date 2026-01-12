@@ -24,7 +24,7 @@ jobs:
       run: |
         cd XGOSAppPhone
         xcodebuild build \
-          -workspace XGOSAppPhone.xcworkspace \
+          -project XGOSAppPhone.xcodeproj \
           -scheme XGOSAppPhone \
           -configuration Release \
           -destination 'generic/platform=iOS' \
@@ -36,7 +36,7 @@ jobs:
       run: |
         cd XGOSAppPhone
         xcodebuild archive \
-          -workspace XGOSAppPhone.xcworkspace \
+          -project XGOSAppPhone.xcodeproj \
           -scheme XGOSAppPhone \
           -configuration Release \
           -archivePath build/XGOSAppPhone.xcarchive \
