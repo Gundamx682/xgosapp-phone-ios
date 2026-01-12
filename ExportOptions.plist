@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- 导出方法：development 用于自签名测试 -->
+    <key>method</key>
+    <string>development</string>
+    
+    <!-- Team ID：从 Apple Developer 获取 -->
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID</string>
+    
+    <!-- 编译 Bitcode：禁用以加快构建速度 -->
+    <key>compileBitcode</key>
+    <false/>
+    
+    <!-- 上传符号：自签名不需要 -->
+    <key>uploadSymbols</key>
+    <false/>
+    
+    <!-- 目标设备：universal 支持 iPhone 和 iPad -->
+    <key>destination</key>
+    <string>upload</string>
+    
+    <!-- 签名样式：automatic 自动管理签名 -->
+    <key>signingStyle</key>
+    <string>automatic</string>
+    
+    <!-- 管理器：Xcode -->
+    <key>manageAppVersionAndBuildNumber</key>
+    <true/>
+    
+    <!-- 上传 Bitcode：禁用 -->
+    <key>uploadBitcode</key>
+    <false/>
+</dict>
+</plist>

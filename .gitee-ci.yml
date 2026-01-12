@@ -1,0 +1,71 @@
+# Gitee CI 配置文件
+# 用于在线构建 iOS 应用
+
+name: iOS Build
+
+# 触发条件
+trigger:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# 环境变量
+variables:
+  # 配置你的 Apple ID
+  APPLE_ID: "your-apple-id@example.com"
+  # 配置你的 Apple ID 密码（应用专用密码）
+  APPLE_ID_PASSWORD: "xxxx-xxxx-xxxx-xxxx"
+  # 配置你的 Team ID
+  TEAM_ID: "YOUR_TEAM_ID"
+  # 项目配置
+  XCODE_WORKSPACE: "XGOSAppPhone.xcworkspace"
+  XCODE_SCHEME: "XGOSAppPhone"
+
+# 构建流程
+stages:
+  - name: Install Dependencies
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - pod install --repo-update
+
+  - name: Build iOS App
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - xcodebuild build \
+        -workspace $XCODE_WORKSPACE \
+        -scheme $XCODE_SCHEME \
+        -configuration Release \
+        -archivePath build/XGOSAppPhone.xcarchive \
+        -destination 'generic/platform=iOS' \
+        CODE_SIGN_IDENTITY="iPhone Distribution" \
+        CODE_SIGNING_REQUIRED=YES \
+        CODE_SIGNING_ALLOWED=YES \
+        PROVISIONING_PROFILE_SPECIFIER="" \
+        DEVELOPMENT_TEAM=$TEAM_ID
+
+  - name: Export IPA
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - xcodebuild -exportArchive \
+        -archivePath build/XGOSAppPhone.xcarchive \
+        -exportPath build/export \
+        -exportOptionsPlist ExportOptions.plist
+
+# 构建产物
+artifacts:
+  paths:
+    - XGOSAppPhone/build/export/*.ipa
+    - XGOSAppPhone/build/export/*.dSYM
+  expire_in: 7 days
+
+# 缓存
+cache:
+  paths:
+    - XGOSAppPhone/Pods/
+    - XGOSAppPhone/build/
+
+# 构建环境
+image: macos-latest
