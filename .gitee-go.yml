@@ -1,0 +1,62 @@
+version: '1.0'
+name: iOS Build
+displayName: iOS 构建流水线
+triggers:
+  trigger: auto
+  push:
+    branches:
+      prefix:
+        - ''
+stages:
+  - stage:
+      name: stage-1
+      displayName: iOS 构建阶段
+      jobs:
+        - job:
+            name: job-1
+            displayName: iOS 构建任务
+            runs-on:
+              pool-name: docker
+              container:
+                image: macos-latest
+            steps:
+              - step: shell@1
+                name: shell-1
+                displayName: 安装依赖
+                commands:
+                  - cd XGOSAppPhone
+                  - pod install
+              - step: shell@1
+                name: shell-2
+                displayName: 构建应用
+                commands:
+                  - cd XGOSAppPhone
+                  - xcodebuild build \
+                    -workspace XGOSAppPhone.xcworkspace \
+                    -scheme XGOSAppPhone \
+                    -configuration Release \
+                    -destination 'generic/platform=iOS' \
+                    CODE_SIGN_IDENTITY="" \
+                    CODE_SIGNING_REQUIRED=NO \
+                    CODE_SIGNING_ALLOWED=NO
+              - step: shell@1
+                name: shell-3
+                displayName: 导出 IPA
+                commands:
+                  - cd XGOSAppPhone
+                  - xcodebuild archive \
+                    -workspace XGOSAppPhone.xcworkspace \
+                    -scheme XGOSAppPhone \
+                    -configuration Release \
+                    -archivePath build/XGOSAppPhone.xcarchive \
+                    -destination 'generic/platform=iOS' \
+                    CODE_SIGN_IDENTITY="" \
+                    CODE_SIGNING_REQUIRED=NO \
+                    CODE_SIGNING_ALLOWED=NO
+                  - xcodebuild -exportArchive \
+                    -archivePath build/XGOSAppPhone.xcarchive \
+                    -exportPath build/export \
+                    -exportOptionsPlist ExportOptions-NoSign.plist
+            artifacts:
+              - name: IPA 文件
+                path: XGOSAppPhone/build/export/*.ipa
