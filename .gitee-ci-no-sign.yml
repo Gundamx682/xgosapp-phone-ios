@@ -1,0 +1,75 @@
+# Gitee CI 配置文件 - 无签名版本
+# 构建未签名的应用，然后用 AltStore/Sideloadly 等工具签名
+
+name: iOS Build (No Sign)
+
+# 触发条件
+trigger:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# 项目配置
+variables:
+  XCODE_WORKSPACE: "XGOSAppPhone.xcworkspace"
+  XCODE_SCHEME: "XGOSAppPhone"
+
+# 构建流程
+stages:
+  - name: Install Dependencies
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - pod install --repo-update
+
+  - name: Build iOS App (No Sign)
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - xcodebuild build \
+        -workspace $XCODE_WORKSPACE \
+        -scheme $XCODE_SCHEME \
+        -configuration Debug \
+        -sdk iphonesimulator \
+        -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO
+
+  - name: Build for Device (No Sign)
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - xcodebuild archive \
+        -workspace $XCODE_WORKSPACE \
+        -scheme $XCODE_SCHEME \
+        -configuration Release \
+        -archivePath build/XGOSAppPhone.xcarchive \
+        -destination 'generic/platform=iOS' \
+        CODE_SIGN_IDENTITY="" \
+        CODE_SIGNING_REQUIRED=NO \
+        CODE_SIGNING_ALLOWED=NO
+
+  - name: Export IPA (No Sign)
+    script:
+      - cd $CI_PROJECT_DIR/XGOSAppPhone
+      - xcodebuild -exportArchive \
+        -archivePath build/XGOSAppPhone.xcarchive \
+        -exportPath build/export \
+        -exportOptionsPlist ExportOptions-NoSign.plist
+
+# 构建产物
+artifacts:
+  paths:
+    - XGOSAppPhone/build/export/*.ipa
+    - XGOSAppPhone/build/export/*.dSYM
+  expire_in: 7 days
+
+# 缓存
+cache:
+  paths:
+    - XGOSAppPhone/Pods/
+    - XGOSAppPhone/build/
+
+# 构建环境
+image: macos-latest
