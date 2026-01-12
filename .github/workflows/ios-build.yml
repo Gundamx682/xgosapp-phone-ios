@@ -1,0 +1,61 @@
+name: iOS Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install CocoaPods dependencies
+      run: |
+        cd XGOSAppPhone
+        pod install
+
+    - name: Build iOS app
+      run: |
+        cd XGOSAppPhone
+        xcodebuild build \
+          -workspace XGOSAppPhone.xcworkspace \
+          -scheme XGOSAppPhone \
+          -configuration Release \
+          -destination 'generic/platform=iOS' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+    - name: Archive iOS app
+      run: |
+        cd XGOSAppPhone
+        xcodebuild archive \
+          -workspace XGOSAppPhone.xcworkspace \
+          -scheme XGOSAppPhone \
+          -configuration Release \
+          -archivePath build/XGOSAppPhone.xcarchive \
+          -destination 'generic/platform=iOS' \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO
+
+    - name: Export IPA
+      run: |
+        cd XGOSAppPhone
+        xcodebuild -exportArchive \
+          -archivePath build/XGOSAppPhone.xcarchive \
+          -exportPath build/export \
+          -exportOptionsPlist ExportOptions-NoSign.plist
+
+    - name: Upload IPA artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: XGOSAppPhone-IPA
+        path: XGOSAppPhone/build/export/*.ipa
+        retention-days: 7
